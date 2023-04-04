@@ -16,29 +16,44 @@ def set_up_reddit():
     return reddit
 
 
-def reddit_parser():
+def reddit_parser(topic: str) -> None:
+    """
+    :param topic: keyword to search through reddit subreddits
+    """
+    individual_subreddit(topic)
+    search_all_subreddit(topic)
+
+
+def individual_subreddit(topic: str):
     reddit = set_up_reddit()
     headlines = set()
 
-    topic = "politics"
-    subreddit = reddit.subreddit(topic).top(limit=5)
-    top_posts = dict()
+    # Working with hot is better because we will not get new data if we use top
+    # default time is all time, so the same titles are gotten over and over again
+    # TODO: write exception in case subreddit doesnt exists
+    subreddit = reddit.subreddit(topic).hot(limit=10)
+    hot_posts = dict()
 
+    # Get comments
     for submission in subreddit:
-        top_posts[submission.title] = submission.comments[0].body
+        # TODO: deal with bot comments
+        # TODO: figure how many comments we want to analyze
+        hot_posts[submission.title] = submission.comments[0].body
         headlines.add(submission.title)
 
+    # TODO: what is the difference between getting words from topic's subreddit and from all subreddit search
     comments_result = open(f"comments_{topic}.txt", "w+")
-    for comment_gotten in top_posts.values():
+    for comment_gotten in hot_posts.values():
         comments_result.write(comment_gotten)
     comments_result.close()
 
-    title_posts = pd.DataFrame(headlines)
-    title_posts.to_csv('test_titles_hot.csv', header=False, encoding='utf-8', index=False)
+    with open(f"ind_titles_hot_{topic}.txt", "w", encoding="utf-8") as f:
+        for result in headlines:
+            f.write(result)
 
 
 def read_titles_count_vector():
-    with open("test_titles_hot.csv", "r") as f:
+    with open("test_titles_hot.txt", "r") as f:
         lines = f.readlines()
 
     vectorizer = CountVectorizer()
@@ -52,13 +67,25 @@ def read_titles_count_vector():
     words_tiles = word_weigh_vector.get_feature_names_out()
     words_values = word_weigh_vector.idf_
 
+    print(words_tiles)
+    print(words_values)
+
+    #dt = pd.DataFrame(col=)
     fig, ax = plt.subplots()
     ax.plot(words_tiles, words_values)
     plt.show()
 
 
+def search_all_subreddit(topic: str):
+    reddit = set_up_reddit()
+    # TODO: fix this search, it is taking top instead of hot
+    subreddit = reddit.subreddit("all").search(topic, limit=10)
+
+    with open(f"all_titles_hot_{topic}.txt", "w", encoding="utf-8") as f:
+        for result in subreddit:
+            f.write(result.title)
 
 
-# reddit_parser()
-read_titles_count_vector()
+reddit_parser("cats")
+
 
