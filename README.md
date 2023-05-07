@@ -13,3 +13,5 @@ Software engineering's project. A tool to learn the most common words about an s
 + Pandas
 + Sci-kit learn
 + Tkinter
++ youtube-transcript-api
++ wikipediaapi
