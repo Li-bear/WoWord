@@ -107,7 +107,7 @@ def search_all_subreddit(topic: str):
 
 def wikipedia_parser(topic):
     # TODO: what happen when there are multiple article pages?
-    article = wikipedia_article_content_API(topic_word)
+    article = wikipedia_article_content_API(topic)
     with open(f"wikipedia_{topic}.txt", "w", encoding="utf-8") as f:
         f.write(article)
 
