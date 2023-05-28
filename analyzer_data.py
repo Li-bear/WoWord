@@ -4,6 +4,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
+import all_scrapper
 
 def get_type_word(word_to_search):
     r = requests.get(f'https://api.dictionaryapi.dev/api/v2/entries/en/{word_to_search}')
@@ -46,8 +47,17 @@ def get_n_top_words(filename, n_words, keyword):
 
     for word in result_df['words']:
         result_df.loc[result_df['words'] == word, 'type'] = get_type_word(word)
-    print(result_df)
+    return result_df
 
-
-
-
+def top_words_gui_getter(topic: str, n: int, source: int):
+    if source == 0:
+        all_scrapper.wikipedia_parser(topic)
+        return get_n_top_words(f"wikipedia_{topic}.txt",n,"")
+    elif source == 1:
+        all_scrapper.search_all_subreddit(topic)
+        return get_n_top_words(f"reddit_{topic}.txt",n,"")
+    elif source == 2:
+        all_scrapper.youtube_parser(topic)
+        return get_n_top_words(f"youtube_{topic}.txt",n,"")
+    
+print(top_words_gui_getter("Bee",5,0)['words'].values.tolist())
