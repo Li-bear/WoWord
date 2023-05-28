@@ -49,16 +49,18 @@ def gen_dummy_figure():
 
     return fig
 
-def graphs_window(figures):
+def graphs_window(figures,keyword):
     graphs_win = tk.Tk()
     graphs_win.geometry('1600x300')
     graphs_win.title('Graphs')
 
     graphics = tk.Frame(graphs_win)
-
+    font_titles = ('arial', 20, "bold")
+    title = tk.Label(graphics, text=f'Topic searched: {keyword}', font=font_titles)
+    title.pack(side=tk.TOP)
     bottomGraphics = tk.Frame(graphs_win)
     for i, x in enumerate(figures):
-        if i == 3:
+        if len(figures) > 1 and i == len(figures)-1:
             tempcanv = FigureCanvasTkAgg(x, master=bottomGraphics)
             tempcanv.draw()
             tempcanv.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
@@ -72,7 +74,7 @@ def graphs_window(figures):
 
 def results_window(parse_wiki: bool, parse_reddit: bool, parse_youtube: bool, word_number: str, topic: str):
     results = tk.Tk()
-    results.geometry('800x300')
+    results.geometry('800x800')
     results.title('Results')
     wordN = int(word_number.get())
     tpc = topic.get()
@@ -84,7 +86,7 @@ def results_window(parse_wiki: bool, parse_reddit: bool, parse_youtube: bool, wo
 
     top_frame_results = tk.Frame(results)
     title_win = tk.Label(top_frame_results, text='Results')
-    graphs_button = tk.Button(master=top_frame_results, text="See graphs",command=lambda: graphs_window(figure_arr))
+    graphs_button = tk.Button(master=top_frame_results, text="See graphs",command=lambda: graphs_window(figure_arr,tpc))
     export_button = tk.Button(master=top_frame_results, text="Export")
     font_titles = ('arial', 20, "bold")
     title_win.configure(font=font_titles)
@@ -141,8 +143,9 @@ def results_window(parse_wiki: bool, parse_reddit: bool, parse_youtube: bool, wo
         figure_arr.append(analyzer_data.pie_chart_individual_source(youtubedf,"YouTube"))
         df_arr.append(youtubedf)
 
-    all_df = pd.concat(df_arr)
-    figure_arr.append(analyzer_data.bar_chart_all_sources(all_df))
+    if len(df_arr) > 1:
+        all_df = pd.concat(df_arr)
+        figure_arr.append(analyzer_data.bar_chart_all_sources(all_df))
     top_frame_results.pack(fill=tk.X)
     cont.pack(fill=tk.BOTH)
     canv.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
