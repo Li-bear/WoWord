@@ -75,7 +75,8 @@ def pie_chart_individual_source(source_df: pd.DataFrame, source_from: str) -> pl
 
     fig, ax = plt.subplots()
     plt.title(f"TF-IDF from {source_from}")
-    return ax.pie(TF_value, labels=labels, autopct='%1.1f%%')
+    ax.pie(TF_value, labels=labels, autopct='%1.1f%%')
+    return fig
 
 
 def bar_chart_all_sources(all_df: pd.DataFrame) -> plt.figure:

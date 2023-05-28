@@ -49,24 +49,32 @@ def gen_dummy_figure():
 
     return fig
 
-
-def graphs_window(figure1, figure2):
+def graphs_window(figures,keyword):
     graphs_win = tk.Tk()
-    graphs_win.geometry('600x600')
+    graphs_win.geometry('1600x300')
     graphs_win.title('Graphs')
 
     graphics = tk.Frame(graphs_win)
-    canvas1 = FigureCanvasTkAgg(figure1, master=graphics)
-    canvas2 = FigureCanvasTkAgg(figure2, master=graphics)
-    canvas1.draw()
-    canvas2.draw()
-    canvas1.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-    canvas2.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-    graphics.pack()
+    font_titles = ('arial', 20, "bold")
+    title = tk.Label(graphics, text=f'Topic searched: {keyword}', font=font_titles)
+    title.pack(side=tk.TOP)
+    bottomGraphics = tk.Frame(graphs_win)
+    for i, x in enumerate(figures):
+        if len(figures) > 1 and i == len(figures)-1:
+            tempcanv = FigureCanvasTkAgg(x, master=bottomGraphics)
+            tempcanv.draw()
+            tempcanv.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        else:
+            tempcanv = FigureCanvasTkAgg(x, master=graphics)
+            tempcanv.draw()
+            tempcanv.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    bottomGraphics.pack()
+    graphics.pack(side=tk.TOP)
 
 def results_window(parse_wiki: bool, parse_reddit: bool, parse_youtube: bool, word_number: str, topic: str):
     results = tk.Tk()
-    results.geometry('800x300')
+    results.geometry('800x800')
     results.title('Results')
     wordN = int(word_number.get())
     tpc = topic.get()
@@ -78,7 +86,7 @@ def results_window(parse_wiki: bool, parse_reddit: bool, parse_youtube: bool, wo
 
     top_frame_results = tk.Frame(results)
     title_win = tk.Label(top_frame_results, text='Results')
-    graphs_button = tk.Button(master=top_frame_results, text="See graphs",command=lambda: graphs_window(gen_dummy_figure(),gen_dummy_figure()))
+    graphs_button = tk.Button(master=top_frame_results, text="See graphs",command=lambda: graphs_window(figure_arr,tpc))
     export_button = tk.Button(master=top_frame_results, text="Export")
     font_titles = ('arial', 20, "bold")
     title_win.configure(font=font_titles)
@@ -107,25 +115,37 @@ def results_window(parse_wiki: bool, parse_reddit: bool, parse_youtube: bool, wo
     wiki_header = tk.Label(parse_frame_results, text="Wikipedia", font=font_header)
     reddit_header = tk.Label(parse_frame_results, text="Reddit", font=font_header)
     youtube_header = tk.Label(parse_frame_results, text="YouTube", font=font_header)
+
+    figure_arr = []
+    df_arr = []
     if parse_wiki.get():
         wiki_header.pack()
         wikidf = analyzer_data.top_words_gui_getter(tpc,wordN,0)
         generate_frames(parse_frame_results,
                         wikidf['words'].values.tolist(),
                         wikidf['type'].values.tolist())
+        figure_arr.append(analyzer_data.pie_chart_individual_source(wikidf,"Wikipedia"))
+        df_arr.append(wikidf)
     if parse_reddit.get():
         reddit_header.pack()
         redditdf = analyzer_data.top_words_gui_getter(tpc,wordN,1)
         generate_frames(parse_frame_results,
                         redditdf['words'].values.tolist(),
                         redditdf['type'].values.tolist())
+        figure_arr.append(analyzer_data.pie_chart_individual_source(redditdf,"Reddit"))
+        df_arr.append(redditdf)
     if parse_youtube.get():
         youtube_header.pack()
         youtubedf = analyzer_data.top_words_gui_getter(tpc,wordN,2)
         generate_frames(parse_frame_results,
                         youtubedf['words'].values.tolist(),
                         youtubedf['type'].values.tolist())
+        figure_arr.append(analyzer_data.pie_chart_individual_source(youtubedf,"YouTube"))
+        df_arr.append(youtubedf)
 
+    if len(df_arr) > 1:
+        all_df = pd.concat(df_arr)
+        figure_arr.append(analyzer_data.bar_chart_all_sources(all_df))
     top_frame_results.pack(fill=tk.X)
     cont.pack(fill=tk.BOTH)
     canv.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
